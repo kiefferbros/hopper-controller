@@ -30,7 +30,7 @@ namespace Hopper
   const unsigned char k_ProximityPin = 1;
   const unsigned char k_LightPin = 2;
   const unsigned char k_MotorPin = 3;
-  const unsigned long k_DelayInterval = 30000; // ms
+  const unsigned long k_DelayInterval = 15000; // ms
   const unsigned long k_LightDelayInterval = 500; // ms
   const unsigned long k_LightMotorInterval = 250; // ms
   const unsigned long k_ProximityInterval = 3000; // ms
@@ -83,7 +83,7 @@ void loop()
 	if ((prev & Out::Motor) == Out::Motor)
 	{
 		// motor is active: keep timer running unless proximity is high
-		if ((next & In::Optical) == In::Optical && s_Timer > k_DelayInterval + k_ProximityInterval)
+		if ((next & In::Proximity) == In::Proximity && s_Timer > k_DelayInterval + k_ProximityInterval)
 		{
 			s_Timer = 0;
 		}
