@@ -16,25 +16,24 @@
  *DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
  *OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifdef ACTIVE_LOW
-#define ACTIVE LOW
-#define INACTIVE HIGH
-#else
-#define ACTIVE HIGH
-#define INACTIVE LOW
-#endif
+
+#define OPTICAL_ACTIVE LOW
+#define PROXIMITY_ACTIVE LOW
+
+#define OUTPUT_ACTIVE HIGH
+#define OUTPUT_INACTIVE LOW
 
 namespace Hopper
 {
-  const unsigned char k_OpticalPin = 0;
-  const unsigned char k_ProximityPin = 1;
-  const unsigned char k_LightPin = 2;
-  const unsigned char k_MotorPin = 3;
-  const unsigned long k_DelayInterval = 15000; // ms
+  const unsigned char k_OpticalPin = 6;
+  const unsigned char k_ProximityPin = 7;
+  const unsigned char k_LightPin = 8;
+  const unsigned char k_MotorPin = 9;
+  const unsigned long k_DelayInterval = 10000; // ms
   const unsigned long k_LightDelayInterval = 500; // ms
   const unsigned long k_LightMotorInterval = 250; // ms
   const unsigned long k_ProximityInterval = 3000; // ms
-  const unsigned long k_LoopDelay = 100; // ms
+  const unsigned long k_LoopDelay = 50; // ms
 
   enum In : unsigned char
   {
@@ -69,6 +68,8 @@ void setup()
 	pinMode(k_MotorPin, OUTPUT);
 
   s_Time = millis();
+
+  Serial.begin(9600);
 }
 
 void loop()
@@ -77,8 +78,12 @@ void loop()
   unsigned long time = millis();
 	
 	// read analog input
-	next |= digitalRead(k_OpticalPin) ? In::Optical : 0;
-	next |= digitalRead(k_ProximityPin) ? In::Proximity : 0;
+	next |= digitalRead(k_OpticalPin) == OPTICAL_ACTIVE ? In::Optical : 0;
+	next |= digitalRead(k_ProximityPin) == PROXIMITY_ACTIVE ? In::Proximity : 0;
+
+  Serial.print((next & In::Optical) == In::Optical);
+  Serial.print(" ");
+  Serial.println((next & In::Proximity) == In::Proximity);
 	
 	if ((prev & Out::Motor) == Out::Motor)
 	{
@@ -105,6 +110,8 @@ void loop()
 		{
 			s_Timer = 0.0f;
 		}
+
+    
 	}
 	
 	// timer is running
@@ -134,8 +141,8 @@ void loop()
 	s_State = next;
   s_Time = time;
 	
-	digitalWrite(k_LightPin, (next & Out::Light) == Out::Light ? ACTIVE : INACTIVE);
-	digitalWrite(k_MotorPin, (next & Out::Motor) == Out::Motor ? ACTIVE : INACTIVE);
+	digitalWrite(k_LightPin, (next & Out::Light) == Out::Light ? OUTPUT_ACTIVE : OUTPUT_INACTIVE);
+	digitalWrite(k_MotorPin, (next & Out::Motor) == Out::Motor ? OUTPUT_ACTIVE : OUTPUT_INACTIVE);
 	
 	delay(k_LoopDelay);
 }
