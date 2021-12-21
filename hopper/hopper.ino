@@ -68,8 +68,6 @@ void setup()
 	pinMode(k_MotorPin, OUTPUT);
 
   s_Time = millis();
-
-  Serial.begin(9600);
 }
 
 void loop()
@@ -80,10 +78,6 @@ void loop()
 	// read analog input
 	next |= digitalRead(k_OpticalPin) == OPTICAL_ACTIVE ? In::Optical : 0;
 	next |= digitalRead(k_ProximityPin) == PROXIMITY_ACTIVE ? In::Proximity : 0;
-
-  Serial.print((next & In::Optical) == In::Optical);
-  Serial.print(" ");
-  Serial.println((next & In::Proximity) == In::Proximity);
 	
 	if ((prev & Out::Motor) == Out::Motor)
 	{
@@ -110,8 +104,6 @@ void loop()
 		{
 			s_Timer = 0.0f;
 		}
-
-    
 	}
 	
 	// timer is running
