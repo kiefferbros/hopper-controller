@@ -21,19 +21,27 @@
 #define PROXIMITY_ACTIVE LOW
 
 #define OUTPUT_ACTIVE HIGH
-#define OUTPUT_INACTIVE LOW
 
 namespace Hopper
 {
+  // pin used for reading optical IR sensor
   const unsigned char k_OpticalPin = 6;
+  // pin used for reading proximity sensor
   const unsigned char k_ProximityPin = 7;
+  // pin used for controlling light
   const unsigned char k_LightPin = 8;
+  // pin used for controlling motor
   const unsigned char k_MotorPin = 9;
+  // how many milliseconds does the IR sensor need to be blocked before the motor kicks in
   const unsigned long k_DelayInterval = 10000; // ms
+  // how many milliseconds does the light flash while the IR sensor is tripped
   const unsigned long k_LightDelayInterval = 500; // ms
-  const unsigned long k_LightMotorInterval = 250; // ms
-  const unsigned long k_ProximityInterval = 3000; // ms
-  const unsigned long k_LoopDelay = 50; // ms
+  // how long does the motor need to be on before the proximity sensor will turn off the motor
+  const unsigned long k_ProximityInterval = 2000; // ms
+  // how long to delay before executing the loop
+  const unsigned long k_LoopDelay = 20; // ms
+  // prevent the motor from running forever if the proximity sensor is not triggered
+  const unsigned long k_MaxMotorInterval = 20000; // ms
 
   enum In : unsigned char
   {
@@ -72,6 +80,8 @@ void setup()
 
 void loop()
 {
+  delay(k_LoopDelay);
+
 	unsigned char next = 0, prev = s_State;
   unsigned long time = millis();
 	
@@ -81,8 +91,9 @@ void loop()
 	
 	if ((prev & Out::Motor) == Out::Motor)
 	{
-		// motor is active: keep timer running unless proximity is high
-		if ((next & In::Proximity) == In::Proximity && s_Timer > k_DelayInterval + k_ProximityInterval)
+		// motor is active: keep timer running unless proximity is high or max motor interval is hit
+		if (s_Timer > k_DelayInterval + k_MaxMotorInterval ||
+        ((next & In::Proximity) == In::Proximity && s_Timer > k_DelayInterval + k_ProximityInterval))
 		{
 			s_Timer = 0;
 		}
@@ -116,12 +127,7 @@ void loop()
 		if (s_Timer > k_DelayInterval)
 		{
 			next |= Out::Motor;
-			
-			// flash light for motor
-			if ((s_Timer / k_LightMotorInterval) % 2 == 1)
-			{
-				next |= Out::Light;
-			}
+			next |= Out::Light;
 		}
 		// flash light for delay
 		else if ((s_Timer / k_LightDelayInterval) % 2 == 1)
@@ -132,9 +138,11 @@ void loop()
 
 	s_State = next;
   s_Time = time;
+
+
 	
-	digitalWrite(k_LightPin, (next & Out::Light) == Out::Light ? OUTPUT_ACTIVE : OUTPUT_INACTIVE);
-	digitalWrite(k_MotorPin, (next & Out::Motor) == Out::Motor ? OUTPUT_ACTIVE : OUTPUT_INACTIVE);
+	digitalWrite(k_LightPin, (next & Out::Light) == Out::Light ? OUTPUT_ACTIVE : !OUTPUT_ACTIVE);
+	digitalWrite(k_MotorPin, (next & Out::Motor) == Out::Motor ? OUTPUT_ACTIVE : !OUTPUT_ACTIVE);
 	
-	delay(k_LoopDelay);
+	
 }
