@@ -1,14 +1,14 @@
 # Hopper Controller #
-An Arduino sketch for controlling a light and motor with two binary sensors. Objects are moved to hopper and after the infrared obstruction sensor (garage door sensor) is tripped for a specified duration motor is activated. Light flashes at slow (by default) interval when IR sensor is tripped and at a faster (by default) interval when motor is active. Motor remains active until the proximity sensor is tripped by a steel bolt on the disc which inidicates a closed position for the hopper. The counter weight keeps the hopper closed and helps correct any over shoot from the motor. Two solid state relays can be used to isolate the AC components.
+An Arduino sketch for controlling a light and motor with two NPN sensors. Objects are moved into the hopper and after the infrared obstruction sensor (garage door sensor) is tripped for a specified duration, the motor is activated. The light flashes at a slow interval (by default) when IR sensor is first tripped and goes solid when the motor is active. Motor remains active until the proximity sensor is tripped by a steel bolt on the disc which inidicates a closed position for the hopper. The counter weight keeps the hopper closed and helps correct any over shoot from the motor. Two solid state relays can be used to isolate the AC components.
 
 ## Mechanical Use Case ##
 ```
                     Motor & Disc
-       IR Sensor         |
-           |             |
-        o--˅-------/     |  
-        | \□OO OOO/     _˅_   []<--Light
-        |  \OOOOO/-----/-  \
+        IR Sensor        |
+            |            |
+        o---|------/     |  
+        | \O˅O OOO/     _˅_   []<--Light
+        |  \□OOOO/-----/-  \
 Weight->■   -- --   ˄ |  O  |
             ˄   ˄   |  \___/ □ <--Proximity Sensor
             |   |  Rope
@@ -18,15 +18,16 @@ Weight->■   -- --   ˄ |  O  |
 
 ## Circuit Diagram ##
 ```
-                ┌─+┌───IR────┐-─┐
-                │  └──Emit───┘  │	
-┌───────────────┼─+┌───IR────┐-─┤
-│     [5VDC]    │  └┬Receive─┘  │
-│       │       │   │           │
+  ┌─────────────────────────────┐
+  │             ┌─+┌───IR────┐-─┤
+  └─-[13VDC]+───┤  └──Emit───┘  │	
+        │       └─+┌───IR────┐-─┤
+        │          └┬Receive─┘  │
+┌───────────────┐   │           │
 │       │       └─+┌Proximity┐-─┤
-│  ┌───USB───┐	   └────┬────┘  │
+│  ┌───PWR───┐	   └────┬────┘  │
 │  │         │      │   │       │
-└5V│         │GND──────────┬────┴─────────┐
+└5V│         │      │   │  ┌────┴─────────┐
    │ Arduino │D6────┘   │  │              │
    │         │D7────────┘  │              │
    │         │D8┐          │              │
