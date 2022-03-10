@@ -70,8 +70,8 @@ using namespace Hopper;
 
 void setup()
 {
-  pinMode(k_OpticalPin, INPUT);
-  pinMode(k_ProximityPin, INPUT);
+  pinMode(k_OpticalPin, INPUT_PULLUP);
+  pinMode(k_ProximityPin, INPUT_PULLUP);
 	pinMode(k_LightPin, OUTPUT);
 	pinMode(k_MotorPin, OUTPUT);
 
